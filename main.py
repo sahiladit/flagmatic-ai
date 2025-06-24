@@ -21,7 +21,7 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 app = FastAPI()
 
 from fastapi.staticfiles import StaticFiles
-app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 from fastapi.responses import FileResponse
 from pathlib import Path
