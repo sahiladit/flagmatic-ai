@@ -20,10 +20,8 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
     formData.append("job", jobDescription);
 
     // 🚀 Detect environment: local or production
-    const BASE_URL =
-      window.location.hostname === "localhost"
-        ? "http://localhost:8000"
-        : "https://flagmatic-ai.onrender.com";
+    const BASE_URL = window.location.origin;
+
 
     const response = await fetch(`${BASE_URL}/agent-upload`, {
       method: "POST",
