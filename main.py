@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, Form, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import google.generativeai as genai
 import os
@@ -8,11 +9,6 @@ from dotenv import load_dotenv
 import pdfplumber
 import tempfile
 from docx import Document
-from docx.shared import Pt
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
-
-
 
 # Load API key from .env
 load_dotenv()
@@ -20,18 +16,16 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 app = FastAPI()
 
-from fastapi.staticfiles import StaticFiles
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+# Serve static files like CSS/JS from /static
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-from fastapi.responses import FileResponse
-from pathlib import Path
+# Serve index.html on /
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    with open("static/index.html", "r") as f:
+        return f.read()
 
-@app.get("/")
-async def root():
-    return FileResponse(Path("static/index.html"))
-
-
-# Enable CORS for frontend
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -63,48 +57,46 @@ class TailorAIAgent:
 def save_resume_to_docx(text):
     doc = Document()
     doc.add_heading("Tailored Resume", level=1)
-
     paragraphs = text.split("\n")
     for para in paragraphs:
         if "**" in para:
-            run_parts = para.split("**")
+            parts = para.split("**")
             p = doc.add_paragraph()
-            for i, part in enumerate(run_parts):
+            for i, part in enumerate(parts):
                 run = p.add_run(part)
                 if i % 2 == 1:
                     run.bold = True
         else:
             doc.add_paragraph(para)
-
-    temp_doc_path = tempfile.NamedTemporaryFile(delete=False, suffix=".docx").name
-    doc.save(temp_doc_path)
-    return temp_doc_path
+    path = tempfile.NamedTemporaryFile(delete=False, suffix=".docx").name
+    doc.save(path)
+    return path
 
 @app.post("/agent-generate")
 async def agent_generate(req: ResumeJobRequest):
     model = genai.GenerativeModel("gemini-2.0-flash")
     agent = TailorAIAgent(model)
-    tailored_resume = agent.generate_tailored_resume(req.resume, req.job)
-    doc_path = save_resume_to_docx(tailored_resume)
-    return FileResponse(path=doc_path, filename="Tailored_Resume.docx", media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    tailored = agent.generate_tailored_resume(req.resume, req.job)
+    path = save_resume_to_docx(tailored)
+    return FileResponse(path, filename="Tailored_Resume.docx", media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 @app.post("/agent-upload")
 async def agent_upload(file: UploadFile = File(...), job: str = Form(...)):
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         contents = await file.read()
         tmp.write(contents)
-        tmp_path = tmp.name
+        path = tmp.name
 
-    resume_text = ""
+    text = ""
     try:
-        with pdfplumber.open(tmp_path) as pdf:
+        with pdfplumber.open(path) as pdf:
             for page in pdf.pages:
-                resume_text += page.extract_text() + "\n"
+                text += page.extract_text() + "\n"
     except Exception:
         return {"error": "Failed to parse PDF resume."}
 
     model = genai.GenerativeModel("gemini-2.0-flash")
     agent = TailorAIAgent(model)
-    tailored_resume = agent.generate_tailored_resume(resume_text, job)
-    doc_path = save_resume_to_docx(tailored_resume)
-    return FileResponse(path=doc_path, filename="Tailored_Resume.docx", media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    tailored = agent.generate_tailored_resume(text, job)
+    doc_path = save_resume_to_docx(tailored)
+    return FileResponse(doc_path, filename="Tailored_Resume.docx", media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
