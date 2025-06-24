@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flagmatic – Your Career Copilot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="logo">Flagmatic<span>AI</span></div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#product">Try Now</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Land Your Dream Job. Smarter.</h1>
+    <p>TailorAI helps you create perfectly matched resumes and cover letters for any job — instantly.</p>
+    <a href="#product" class="cta-btn">Try Flagmatic AI Now</a>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <h2>What Flagmatic AI Does</h2>
+    <div class="feature-grid">
+      <div class="feature">
+        <h3>Role-Specific Resumes</h3>
+        <p>Transforms your resume to align with each job description using AI.</p>
+      </div>
+      <div class="feature">
+        <h3>Personalized Cover Letters</h3>
+        <p>Auto-generates compelling letters that match the company’s tone and values.</p>
+      </div>
+      <div class="feature">
+        <h3>Keyword Optimization</h3>
+        <p>Injects the right keywords to beat ATS filters and land interviews.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Section -->
+  <section class="product" id="product">
+    <h2>Tailor Your Resume Now</h2>
+    <div class="form-card">
+      <label>Upload Resume (.txt)</label>
+      <input type="file" id="resumeInput" accept=".txt, .pdf, .docx" />
+
+      <label>Or Paste Resume Text</label>
+      <textarea id="resumeText" placeholder="Paste your resume here..."></textarea>
+
+      <label>Paste Job Description</label>
+      <textarea id="jobInput" placeholder="Paste job description here..."></textarea>
+
+      <button id="generateBtn">Generate My Documents</button>
+      <div id="loading" class="hidden">Working on it...</div>
+    </div>
+
+    <div id="outputSection" class="output hidden">
+      <h3>Tailored Resume</h3>
+      <pre id="resumeOutput"></pre>
+      <button onclick="copyText('resumeOutput')">Copy Resume</button>
+
+      <h3>Cover Letter</h3>
+      <pre id="coverLetterOutput"></pre>
+      <button onclick="copyText('coverLetterOutput')">Copy Cover Letter</button>
+    </div>
+  </section>
+<section class="coming-soon">
+  <h2>🚧 ATS Score Checker – Coming Soon</h2>
+  <p>We're building an AI-powered tool to analyze your resume against job descriptions and give you a score based on ATS compatibility. Stay tuned!</p>
+</section>
+  <!-- Footer -->
+  <footer class="footer" id="about">
+    <p>© 2025 Flagmatic AI.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
