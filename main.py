@@ -23,6 +23,13 @@ app = FastAPI()
 from fastapi.staticfiles import StaticFiles
 app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 
+from fastapi.responses import FileResponse
+from pathlib import Path
+
+@app.get("/")
+async def root():
+    return FileResponse(Path("static/index.html"))
+
 
 # Enable CORS for frontend
 app.add_middleware(
