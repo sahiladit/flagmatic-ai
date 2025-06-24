@@ -19,7 +19,13 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
     formData.append("file", file);
     formData.append("job", jobDescription);
 
-    const response = await fetch("http://localhost:8000/agent-upload", {
+    // 🚀 Detect environment: local or production
+    const BASE_URL =
+      window.location.hostname === "localhost"
+        ? "http://localhost:8000"
+        : "https://flagmatic-ai.onrender.com";
+
+    const response = await fetch(`${BASE_URL}/agent-upload`, {
       method: "POST",
       body: formData,
     });
